@@ -1,13 +1,14 @@
 "use client";
 
+import { PermissionGate } from "@/components/permission-gate";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { 
-  mockUser, 
   calculateStats, 
   calculateRecommendation,
   formatDate 
 } from "@/lib/mock-data";
+import { useUser } from "@/lib/user-context";
 import { 
   TrendingDown, 
   TrendingUp, 
@@ -34,11 +35,17 @@ import {
 import { CustomChartTooltip, WasteTooltip } from "@/components/chart-tooltip";
 
 export default function DashboardPage() {
-  const location = mockUser.locations[0];
-  const records = location.records;
+  const { currentLocation, user } = useUser();
+  const location = currentLocation ?? user.locations[0];
+  const records = location?.records ?? [];
   const stats = calculateStats(records);
   const recommendation = calculateRecommendation(records);
-  const todayRecord = records[records.length - 1];
+  const todayRecord = records[records.length - 1] ?? {
+    produced: 0,
+    sold: 0,
+    wasted: 0,
+    wastePercentage: 0,
+  };
 
   const chartData = records.slice(-7).map((record) => ({
     date: formatDate(record.date),
@@ -53,15 +60,20 @@ export default function DashboardPage() {
   }));
 
   return (
-    <div className="p-4 sm:p-6 lg:p-8 space-y-4 sm:space-y-6">
+    <PermissionGate
+      permission="viewDashboard"
+      title="Tu rol no puede abrir el dashboard"
+      description="Esta vista esta reservada para usuarios con acceso operativo al panel del cliente."
+    >
+      <div className="p-4 sm:p-6 lg:p-8 space-y-4 sm:space-y-6">
       {/* Header */}
       <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
         <div>
           <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-foreground">
-            Hola, {mockUser.name.split(" ")[0]}
+            Hola, {user.name.split(" ")[0]}
           </h1>
           <p className="text-muted-foreground mt-1 text-sm sm:text-base">
-            {location.name} - Resumen de hoy
+            {location?.name || user.businessName} - Resumen de hoy
           </p>
         </div>
         <Link href="/dashboard/registro" className="w-full sm:w-auto">
@@ -304,6 +316,7 @@ export default function DashboardPage() {
           </div>
         </CardContent>
       </Card>
-    </div>
+      </div>
+    </PermissionGate>
   );
 }

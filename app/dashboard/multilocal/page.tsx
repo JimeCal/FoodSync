@@ -1,14 +1,13 @@
 "use client";
 
 import { useState } from "react";
+import { PermissionGate } from "@/components/permission-gate";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { 
-  mockMultiLocationUser, 
   calculateStats, 
   calculateRecommendation,
   formatDate,
-  formatDateFull
 } from "@/lib/mock-data";
 import { useUser } from "@/lib/user-context";
 import { 
@@ -40,17 +39,16 @@ import {
 import { CustomChartTooltip } from "@/components/chart-tooltip";
 
 export default function MultilocalPage() {
-  const { user: userSettings, hasFeature } = useUser();
+  const { user, hasFeature } = useUser();
   const canAccessMultiLocal = hasFeature("multiLocation");
+  const upgradeHref = user.role === "owner" ? "/dashboard/configuracion" : "/dashboard";
   
   const [expandedLocations, setExpandedLocations] = useState<string[]>([]);
-  
-  const user = mockMultiLocationUser;
-  
-  const allRecords = user.locations.flatMap(loc => loc.records);
+
+  const allRecords = user.locations.flatMap((location) => location.records);
   const aggregatedStats = calculateStats(allRecords);
   
-  const locationStats = user.locations.map(location => {
+  const locationStats = user.locations.map((location) => {
     const stats = calculateStats(location.records);
     const recommendation = calculateRecommendation(location.records);
     const todayRecord = location.records[location.records.length - 1];
@@ -63,13 +61,17 @@ export default function MultilocalPage() {
     };
   });
 
-  const comparisonData = user.locations[0].records.slice(-7).map((_, index) => {
-    const date = formatDate(user.locations[0].records.slice(-7)[index].date);
+  const comparisonBase = user.locations[0]?.records.slice(-7) ?? [];
+  const comparisonData = comparisonBase.map((record, index) => {
+    const date = formatDate(record.date);
     const dataPoint: Record<string, string | number> = { date };
     
     user.locations.forEach((location, locIndex) => {
       const record = location.records.slice(-7)[index];
-      dataPoint[`local${locIndex + 1}`] = record.wastePercentage;
+
+      if (record) {
+        dataPoint[`local${locIndex + 1}`] = record.wastePercentage;
+      }
     });
     
     return dataPoint;
@@ -81,8 +83,8 @@ export default function MultilocalPage() {
   const totalWithDiscount = (basePlanPrice - discountPerLocal) * user.locations.length;
   const totalSavings = totalWithoutDiscount - totalWithDiscount;
 
-  const locationNames = user.locations.map(loc => loc.name.split(' - ')[1] || loc.name);
-  const barColors = ['#3D7F35', '#F5841F', '#5BA052'];
+  const locationNames = user.locations.map((location) => location.name.split(" - ")[1] || location.name);
+  const barColors = ["#3D7F35", "#F5841F", "#5BA052", "#2B5F6A"];
 
   const toggleLocationExpand = (locationId: string) => {
     setExpandedLocations(prev => 
@@ -95,46 +97,57 @@ export default function MultilocalPage() {
   // Si no tiene acceso a multi-local, mostrar mensaje de upgrade
   if (!canAccessMultiLocal) {
     return (
-      <div className="p-4 sm:p-6 lg:p-8 space-y-6">
-        <div>
-          <Link href="/dashboard" className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground mb-4 text-sm">
-            <ArrowLeft className="h-4 w-4" />
-            Volver
-          </Link>
-          <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-foreground flex items-center gap-3">
-            <Building2 className="h-6 w-6 sm:h-8 sm:w-8 text-[#3D7F35]" />
-            Vista Multi-local
-          </h1>
-        </div>
-        
-        <Card className="border-[#F5841F]/30">
-          <CardContent className="p-6 sm:p-12 text-center">
-            <div className="w-16 h-16 bg-[#F5841F]/20 rounded-full flex items-center justify-center mx-auto mb-4">
-              <Lock className="h-8 w-8 text-[#F5841F]" />
-            </div>
-            <h2 className="text-xl font-bold text-foreground mb-2">
-              Funcionalidad no disponible
-            </h2>
-            <p className="text-muted-foreground mb-6 max-w-md mx-auto text-sm">
-              La gestion multi-local esta disponible unicamente en el Plan Premium. 
-              Actualiza tu plan para gestionar varios establecimientos desde una sola cuenta.
-            </p>
-            <p className="text-sm text-muted-foreground mb-4">
-              Tu plan actual: <span className="font-semibold text-foreground">Plan {userSettings.plan === "basic" ? "Basico" : userSettings.plan === "plus" ? "Plus" : "Premium"}</span>
-            </p>
-            <Link href="/dashboard/configuracion">
-              <Button className="bg-[#F5841F] hover:bg-[#E07316]">
-                Ver planes disponibles
-              </Button>
+      <PermissionGate
+        permission="viewMultilocal"
+        title="Tu rol no puede abrir la vista multi-local"
+        description="Solo ciertos roles del negocio pueden supervisar varios locales desde una sola cuenta."
+      >
+        <div className="p-4 sm:p-6 lg:p-8 space-y-6">
+          <div>
+            <Link href="/dashboard" className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground mb-4 text-sm">
+              <ArrowLeft className="h-4 w-4" />
+              Volver
             </Link>
-          </CardContent>
-        </Card>
-      </div>
+            <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-foreground flex items-center gap-3">
+              <Building2 className="h-6 w-6 sm:h-8 sm:w-8 text-[#3D7F35]" />
+              Vista Multi-local
+            </h1>
+          </div>
+          
+          <Card className="border-[#F5841F]/30">
+            <CardContent className="p-6 sm:p-12 text-center">
+              <div className="w-16 h-16 bg-[#F5841F]/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Lock className="h-8 w-8 text-[#F5841F]" />
+              </div>
+              <h2 className="text-xl font-bold text-foreground mb-2">
+                Funcionalidad no disponible
+              </h2>
+              <p className="text-muted-foreground mb-6 max-w-md mx-auto text-sm">
+                La gestion multi-local esta disponible unicamente en el Plan Premium. 
+                Actualiza tu plan para gestionar varios establecimientos desde una sola cuenta.
+              </p>
+              <p className="text-sm text-muted-foreground mb-4">
+                Tu plan actual: <span className="font-semibold text-foreground">Plan {user.plan === "basic" ? "Basico" : user.plan === "plus" ? "Plus" : "Premium"}</span>
+              </p>
+              <Link href={upgradeHref}>
+                <Button className="bg-[#F5841F] hover:bg-[#E07316]">
+                  {user.role === "owner" ? "Ver planes disponibles" : "Volver al dashboard"}
+                </Button>
+              </Link>
+            </CardContent>
+          </Card>
+        </div>
+      </PermissionGate>
     );
   }
 
   return (
-    <div className="p-4 sm:p-6 lg:p-8 space-y-4 sm:space-y-6">
+    <PermissionGate
+      permission="viewMultilocal"
+      title="Tu rol no puede abrir la vista multi-local"
+      description="Solo ciertos roles del negocio pueden supervisar varios locales desde una sola cuenta."
+    >
+      <div className="p-4 sm:p-6 lg:p-8 space-y-4 sm:space-y-6">
       {/* Header */}
       <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
         <div>
@@ -239,9 +252,9 @@ export default function MultilocalPage() {
                       <div className="flex items-center gap-3">
                         <div 
                           className="w-10 h-10 rounded-lg flex items-center justify-center shrink-0"
-                          style={{ backgroundColor: `${barColors[index]}20` }}
+                          style={{ backgroundColor: `${barColors[index % barColors.length]}20` }}
                         >
-                          <MapPin className="h-5 w-5" style={{ color: barColors[index] }} />
+                          <MapPin className="h-5 w-5" style={{ color: barColors[index % barColors.length] }} />
                         </div>
                         <div>
                           <CardTitle className="text-sm sm:text-base">{location.name}</CardTitle>
@@ -422,7 +435,7 @@ export default function MultilocalPage() {
                     key={location.id}
                     dataKey={`local${index + 1}`}
                     name={location.name.split(' - ')[1] || location.name}
-                    fill={barColors[index]}
+                    fill={barColors[index % barColors.length]}
                     radius={[4, 4, 0, 0]}
                   />
                 ))}
@@ -434,7 +447,7 @@ export default function MultilocalPage() {
               <div key={location.id} className="flex items-center gap-2">
                 <div 
                   className="w-3 h-3 rounded-full" 
-                  style={{ backgroundColor: barColors[index] }}
+                  style={{ backgroundColor: barColors[index % barColors.length] }}
                 />
                 <span className="text-xs sm:text-sm text-muted-foreground">
                   {location.name.split(' - ')[1] || location.name}
@@ -492,6 +505,7 @@ export default function MultilocalPage() {
           </div>
         </CardContent>
       </Card>
-    </div>
+      </div>
+    </PermissionGate>
   );
 }

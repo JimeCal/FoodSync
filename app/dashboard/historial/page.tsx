@@ -1,9 +1,10 @@
 "use client";
 
+import { useState } from "react";
+import { PermissionGate } from "@/components/permission-gate";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { 
-  mockUser, 
   formatDateFull,
   calculateStats
 } from "@/lib/mock-data";
@@ -21,18 +22,22 @@ import {
   Check
 } from "lucide-react";
 import Link from "next/link";
-import { useState } from "react";
 
 export default function HistorialPage() {
-  const { user: userSettings, hasFeature } = useUser();
-  const location = mockUser.locations[0];
-  const records = [...location.records].reverse();
-  const stats = calculateStats(location.records);
+  const { currentLocation, user: userSettings, hasFeature } = useUser();
+  const location = currentLocation ?? userSettings.locations[0];
+  const records = location ? [...location.records].reverse() : [];
+  const stats = calculateStats(location?.records ?? []);
   const [showExportSuccess, setShowExportSuccess] = useState(false);
 
   const canAccessHistorical = hasFeature("historicalData");
+  const upgradeHref = userSettings.role === "owner" ? "/dashboard/configuracion" : "/dashboard";
 
   const handleExportCSV = () => {
+    if (!location) {
+      return;
+    }
+
     // Crear contenido CSV
     const headers = ["Fecha", "Producidas", "Vendidas", "Desperdicio", "% Desperdicio"];
     const rows = records.map(record => [
@@ -54,7 +59,10 @@ export default function HistorialPage() {
     const url = URL.createObjectURL(blob);
     
     link.setAttribute("href", url);
-    link.setAttribute("download", `historial_${location.name.replace(/\s/g, "_")}_${new Date().toISOString().split("T")[0]}.csv`);
+    link.setAttribute(
+      "download",
+      `historial_${(location?.name || userSettings.businessName).replace(/\s/g, "_")}_${new Date().toISOString().split("T")[0]}.csv`,
+    );
     link.style.visibility = "hidden";
     
     document.body.appendChild(link);
@@ -68,45 +76,56 @@ export default function HistorialPage() {
   // Si no tiene acceso al historial, mostrar mensaje de upgrade
   if (!canAccessHistorical) {
     return (
-      <div className="p-4 sm:p-6 lg:p-8 space-y-6">
-        <div>
-          <Link href="/dashboard" className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground mb-4 text-sm">
-            <ArrowLeft className="h-4 w-4" />
-            Volver
-          </Link>
-          <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-foreground">
-            Historial de datos
-          </h1>
-        </div>
-        
-        <Card className="border-[#F5841F]/30">
-          <CardContent className="p-6 sm:p-12 text-center">
-            <div className="w-16 h-16 bg-[#F5841F]/20 rounded-full flex items-center justify-center mx-auto mb-4">
-              <Lock className="h-8 w-8 text-[#F5841F]" />
-            </div>
-            <h2 className="text-xl font-bold text-foreground mb-2">
-              Funcionalidad no disponible
-            </h2>
-            <p className="text-muted-foreground mb-6 max-w-md mx-auto text-sm">
-              El acceso al historial de datos (90 dias) esta disponible a partir del Plan Plus. 
-              Actualiza tu plan para acceder a esta funcionalidad.
-            </p>
-            <p className="text-sm text-muted-foreground mb-4">
-              Tu plan actual: <span className="font-semibold text-foreground">Plan {userSettings.plan === "basic" ? "Basico" : userSettings.plan === "plus" ? "Plus" : "Premium"}</span>
-            </p>
-            <Link href="/dashboard/configuracion">
-              <Button className="bg-[#F5841F] hover:bg-[#E07316]">
-                Ver planes disponibles
-              </Button>
+      <PermissionGate
+        permission="viewHistory"
+        title="Tu rol no puede revisar historial"
+        description="Necesitas permisos de consulta historica para abrir esta seccion."
+      >
+        <div className="p-4 sm:p-6 lg:p-8 space-y-6">
+          <div>
+            <Link href="/dashboard" className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground mb-4 text-sm">
+              <ArrowLeft className="h-4 w-4" />
+              Volver
             </Link>
-          </CardContent>
-        </Card>
-      </div>
+            <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-foreground">
+              Historial de datos
+            </h1>
+          </div>
+          
+          <Card className="border-[#F5841F]/30">
+            <CardContent className="p-6 sm:p-12 text-center">
+              <div className="w-16 h-16 bg-[#F5841F]/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Lock className="h-8 w-8 text-[#F5841F]" />
+              </div>
+              <h2 className="text-xl font-bold text-foreground mb-2">
+                Funcionalidad no disponible
+              </h2>
+              <p className="text-muted-foreground mb-6 max-w-md mx-auto text-sm">
+                El acceso al historial de datos (90 dias) esta disponible a partir del Plan Plus. 
+                Actualiza tu plan para acceder a esta funcionalidad.
+              </p>
+              <p className="text-sm text-muted-foreground mb-4">
+                Tu plan actual: <span className="font-semibold text-foreground">Plan {userSettings.plan === "basic" ? "Basico" : userSettings.plan === "plus" ? "Plus" : "Premium"}</span>
+              </p>
+              <Link href={upgradeHref}>
+                <Button className="bg-[#F5841F] hover:bg-[#E07316]">
+                  {userSettings.role === "owner" ? "Ver planes disponibles" : "Volver al dashboard"}
+                </Button>
+              </Link>
+            </CardContent>
+          </Card>
+        </div>
+      </PermissionGate>
     );
   }
 
   return (
-    <div className="p-4 sm:p-6 lg:p-8 space-y-4 sm:space-y-6">
+    <PermissionGate
+      permission="viewHistory"
+      title="Tu rol no puede revisar historial"
+      description="Necesitas permisos de consulta historica para abrir esta seccion."
+    >
+      <div className="p-4 sm:p-6 lg:p-8 space-y-4 sm:space-y-6">
       {/* Export Success Toast */}
       {showExportSuccess && (
         <div className="fixed top-4 right-4 z-50 bg-[#3D7F35] text-white px-4 py-2 rounded-lg shadow-lg flex items-center gap-2 animate-in slide-in-from-top">
@@ -126,7 +145,7 @@ export default function HistorialPage() {
             Historial de datos
           </h1>
           <p className="text-muted-foreground mt-1 text-sm">
-            {location.name} - Ultimos 14 dias
+            {(location?.name || userSettings.businessName)} - Ultimos 14 dias
           </p>
         </div>
         <Button 
@@ -281,6 +300,7 @@ export default function HistorialPage() {
           </div>
         </CardContent>
       </Card>
-    </div>
+      </div>
+    </PermissionGate>
   );
 }

@@ -1,10 +1,12 @@
 "use client";
 
 import { useState } from "react";
+import { PermissionGate } from "@/components/permission-gate";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { useUser } from "@/lib/user-context";
 import { 
   Package, 
   ShoppingCart, 
@@ -16,6 +18,7 @@ import {
 import Link from "next/link";
 
 export default function RegistroPage() {
+  const { currentLocation } = useUser();
   const [produced, setProduced] = useState("");
   const [sold, setSold] = useState("");
   const [wasted, setWasted] = useState("");
@@ -49,10 +52,15 @@ export default function RegistroPage() {
 
   if (isSubmitted) {
     return (
-      <div className="p-6 lg:p-8">
-        <div className="max-w-lg mx-auto">
-          <Card className="border-[#3D7F35]/20">
-            <CardContent className="p-8 text-center">
+      <PermissionGate
+        permission="manageRecords"
+        title="Tu rol no puede registrar datos"
+        description="Solo los usuarios con permisos operativos pueden crear o modificar registros diarios."
+      >
+        <div className="p-6 lg:p-8">
+          <div className="max-w-lg mx-auto">
+            <Card className="border-[#3D7F35]/20">
+              <CardContent className="p-8 text-center">
               <div className="w-16 h-16 bg-[#3D7F35]/20 rounded-full flex items-center justify-center mx-auto mb-4">
                 <CheckCircle2 className="h-8 w-8 text-[#3D7F35]" />
               </div>
@@ -92,16 +100,22 @@ export default function RegistroPage() {
                   </Button>
                 </Link>
               </div>
-            </CardContent>
-          </Card>
+              </CardContent>
+            </Card>
+          </div>
         </div>
-      </div>
+      </PermissionGate>
     );
   }
 
   return (
-    <div className="p-6 lg:p-8">
-      <div className="max-w-lg mx-auto">
+    <PermissionGate
+      permission="manageRecords"
+      title="Tu rol no puede registrar datos"
+      description="Solo los usuarios con permisos operativos pueden crear o modificar registros diarios."
+    >
+      <div className="p-6 lg:p-8">
+        <div className="max-w-lg mx-auto">
         {/* Header */}
         <div className="mb-6">
           <Link href="/dashboard" className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground mb-4">
@@ -114,6 +128,9 @@ export default function RegistroPage() {
           <div className="flex items-center gap-2 text-muted-foreground mt-2">
             <Calendar className="h-4 w-4 text-[#F5841F]" />
             <span className="capitalize">{today}</span>
+            {currentLocation && (
+              <span className="text-xs text-muted-foreground">- {currentLocation.name}</span>
+            )}
           </div>
         </div>
 
@@ -216,7 +233,8 @@ export default function RegistroPage() {
             </form>
           </CardContent>
         </Card>
+        </div>
       </div>
-    </div>
+    </PermissionGate>
   );
 }

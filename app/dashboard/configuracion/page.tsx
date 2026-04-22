@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { PermissionGate } from "@/components/permission-gate";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -224,7 +225,12 @@ export default function ConfiguracionPage() {
   };
 
   return (
-    <div className="p-4 sm:p-6 lg:p-8 space-y-4 sm:space-y-6">
+    <PermissionGate
+      permission="manageSettings"
+      title="Tu rol no puede abrir configuracion"
+      description="Solo el dueno del negocio puede cambiar plan, seguridad y ajustes generales."
+    >
+      <div className="p-4 sm:p-6 lg:p-8 space-y-4 sm:space-y-6">
       {/* Mensaje guardado */}
       {showSavedMessage && (
         <div className="fixed top-4 right-4 z-50 bg-[#3D7F35] text-white px-4 py-2 rounded-lg shadow-lg flex items-center gap-2 animate-in slide-in-from-top">
@@ -985,6 +991,7 @@ export default function ConfiguracionPage() {
           </Card>
         </div>
       )}
-    </div>
+      </div>
+    </PermissionGate>
   );
 }

@@ -8,9 +8,13 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { TrendingDown, BarChart3, Sparkles } from "lucide-react";
 import Image from "next/image";
+import { loadAdminClientsSnapshot } from "@/lib/admin-storage";
+import { isHumanRole, platformRoleLabels } from "@/lib/role-permissions";
+import { usePlatformSession } from "@/lib/platform-session";
 
 export default function LoginPage() {
   const router = useRouter();
+  const { login } = usePlatformSession();
   const [email, setEmail] = useState("demo@foodsync.es");
   const [password, setPassword] = useState("demo123");
   const [isLoading, setIsLoading] = useState(false);
@@ -18,16 +22,82 @@ export default function LoginPage() {
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
+
+    const normalizedEmail = email.trim().toLowerCase();
+    const normalizedPassword = password.trim();
+    const isDemoClientAccess = normalizedEmail === "demo@foodsync.es" && normalizedPassword === "demo123";
+    const isDemoAdminAccess = normalizedEmail === "admin@foodsync.es" && normalizedPassword === "admin123";
+    const storedClients = loadAdminClientsSnapshot();
+    const storedCredential = storedClients
+      .flatMap((client) => client.credentials)
+      .find(
+        (credential) =>
+          credential.username.trim().toLowerCase() === normalizedEmail &&
+          credential.passwordMask === normalizedPassword &&
+          credential.status !== "caducada",
+      );
     
     await new Promise(resolve => setTimeout(resolve, 800));
-    
-    router.push("/dashboard");
+
+    if (isDemoAdminAccess) {
+      login({
+        credentialId: "demo-admin",
+        email: "admin@foodsync.es",
+        role: "admin",
+        title: "Administrador FoodSync",
+        userName: "FoodSync Admin",
+      });
+      router.push("/admin");
+      return;
+    }
+
+    if (isDemoClientAccess) {
+      login({
+        credentialId: "cred-client-1-owner",
+        clientId: "client-1",
+        email: "demo@foodsync.es",
+        locationId: "client-1-loc-1",
+        role: "owner",
+        title: "Propietaria",
+        userName: "Maria Garcia",
+      });
+      router.push("/dashboard");
+      return;
+    }
+
+    if (storedCredential) {
+      if (!isHumanRole(storedCredential.type)) {
+        setIsLoading(false);
+        window.alert("Este acceso es tecnico y no puede iniciar sesion en la app.");
+        return;
+      }
+
+      const storedClient = storedClients.find((client) => client.id === storedCredential.clientId);
+      const resolvedLocationId =
+        storedCredential.locationId ?? storedClient?.locations[0]?.id;
+
+      login({
+        credentialId: storedCredential.id,
+        clientId: storedCredential.clientId,
+        email: storedCredential.username,
+        locationId: resolvedLocationId,
+        role: storedCredential.type,
+        title: storedCredential.role || platformRoleLabels[storedCredential.type],
+        userName: storedCredential.label,
+      });
+
+      router.push(storedCredential.type === "admin" ? "/admin" : "/dashboard");
+      return;
+    }
+
+    setIsLoading(false);
+    window.alert("Credenciales no validas o acceso caducado.");
   };
 
   return (
-    <div className="min-h-screen flex flex-col lg:flex-row">
+    <div className="flex min-h-[100dvh] flex-col overflow-hidden lg:h-[100dvh] lg:flex-row">
       {/* Panel izquierdo - Branding (solo desktop) */}
-      <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-[#3D7F35] via-[#4A9340] to-[#3D7F35] p-8 xl:p-12 flex-col justify-between relative overflow-hidden">
+      <div className="relative hidden overflow-hidden bg-gradient-to-br from-[#3D7F35] via-[#4A9340] to-[#3D7F35] lg:flex lg:w-1/2 lg:flex-col lg:justify-between lg:px-8 lg:pb-8 lg:pt-2 xl:px-12 xl:pb-10 xl:pt-3">
         <div className="absolute top-0 right-0 w-96 h-96 bg-[#F5841F]/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
         <div className="absolute bottom-0 left-0 w-80 h-80 bg-white/5 rounded-full blur-2xl translate-y-1/2 -translate-x-1/2" />
         
@@ -37,13 +107,13 @@ export default function LoginPage() {
             alt="FoodSync Logo"
             width={160}
             height={50}
-            className="brightness-0 invert"
+            className="h-auto w-[420px] max-w-full brightness-0 invert xl:w-[460px]"
             style={{ width: 'auto', height: 'auto' }}
             priority
           />
         </div>
         
-        <div className="space-y-6 relative z-10">
+        <div className="relative z-10 space-y-5 xl:space-y-6">
           <h1 className="text-3xl xl:text-4xl font-bold text-white leading-tight text-balance">
             Reduce el desperdicio alimentario de tu negocio
           </h1>
@@ -94,10 +164,10 @@ export default function LoginPage() {
       </div>
       
       {/* Panel derecho - Login */}
-      <div className="flex-1 flex items-center justify-center p-4 sm:p-6 bg-background min-h-screen lg:min-h-0">
-        <div className="w-full max-w-sm">
+      <div className="flex min-h-[100dvh] flex-1 items-center justify-center bg-background p-3 sm:p-4 lg:min-h-0 lg:h-[100dvh] lg:p-6">
+        <div className="flex w-full max-w-sm flex-col justify-center">
           {/* Logo movil */}
-          <div className="lg:hidden flex items-center justify-center mb-6">
+          <div className="mb-4 flex items-center justify-center lg:hidden sm:mb-5">
             <Image
               src="/logo.png"
               alt="FoodSync Logo"
@@ -110,14 +180,14 @@ export default function LoginPage() {
           </div>
           
           <Card className="border-0 shadow-xl">
-            <CardHeader className="space-y-1 pb-4">
+            <CardHeader className="space-y-1 pb-3 sm:pb-4">
               <CardTitle className="text-xl sm:text-2xl font-bold">Bienvenido</CardTitle>
               <CardDescription className="text-sm">
                 Inicia sesion para acceder a tu cuenta
               </CardDescription>
             </CardHeader>
-            <CardContent>
-              <form onSubmit={handleLogin} className="space-y-4">
+            <CardContent className="space-y-3 sm:space-y-4">
+              <form onSubmit={handleLogin} className="space-y-3 sm:space-y-4">
                 <div className="space-y-1.5">
                   <Label htmlFor="email" className="text-sm">Email</Label>
                   <Input
@@ -126,7 +196,7 @@ export default function LoginPage() {
                     placeholder="tu@email.com"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    className="h-10"
+                    className="h-9 sm:h-10"
                     required
                   />
                 </div>
@@ -143,21 +213,21 @@ export default function LoginPage() {
                     placeholder="........"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    className="h-10"
+                    className="h-9 sm:h-10"
                     required
                   />
                 </div>
                 
                 <Button 
                   type="submit" 
-                  className="w-full h-10 text-sm font-semibold bg-[#3D7F35] hover:bg-[#346B2D]"
+                  className="h-9 w-full bg-[#3D7F35] text-sm font-semibold hover:bg-[#346B2D] sm:h-10"
                   disabled={isLoading}
                 >
                   {isLoading ? "Iniciando sesion..." : "Iniciar sesion"}
                 </Button>
               </form>
               
-              <div className="mt-4 text-center">
+              <div className="pt-1 text-center">
                 <p className="text-xs text-muted-foreground">
                   No tienes cuenta?{" "}
                   <button className="text-primary font-medium hover:underline">
@@ -166,16 +236,21 @@ export default function LoginPage() {
                 </p>
               </div>
               
-              <div className="mt-4 p-3 bg-[#F5841F]/10 border border-[#F5841F]/20 rounded-lg">
-                <p className="text-xs text-muted-foreground text-center">
-                  <strong className="text-[#F5841F]">Demo:</strong> Usa las credenciales precargadas
-                </p>
+              <div className="rounded-lg border border-[#F5841F]/20 bg-[#F5841F]/10 p-3">
+                <div className="space-y-1 text-center text-xs text-muted-foreground">
+                  <p>
+                    <strong className="text-[#F5841F]">Cliente demo:</strong> demo@foodsync.es / demo123
+                  </p>
+                  <p>
+                    <strong className="text-[#3D7F35]">Admin demo:</strong> admin@foodsync.es / admin123
+                  </p>
+                </div>
               </div>
             </CardContent>
           </Card>
           
           {/* Features movil - muy compactas */}
-          <div className="lg:hidden mt-4 grid grid-cols-3 gap-2">
+          <div className="mt-3 grid grid-cols-3 gap-2 lg:hidden [@media(max-height:760px)]:hidden">
             <div className="text-center p-2 bg-[#3D7F35]/10 rounded-lg">
               <TrendingDown className="w-4 h-4 text-[#3D7F35] mx-auto mb-1" />
               <p className="text-[10px] text-muted-foreground">-30% desperdicio</p>

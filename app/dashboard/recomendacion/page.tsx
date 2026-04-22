@@ -1,13 +1,14 @@
 "use client";
 
+import { PermissionGate } from "@/components/permission-gate";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { 
-  mockUser, 
   calculateRecommendation,
   calculateStats,
   formatDate
 } from "@/lib/mock-data";
+import { useUser } from "@/lib/user-context";
 import { 
   ArrowLeft,
   Sparkles,
@@ -32,8 +33,9 @@ import {
 import { CustomChartTooltip } from "@/components/chart-tooltip";
 
 export default function RecomendacionPage() {
-  const location = mockUser.locations[0];
-  const records = location.records;
+  const { currentLocation, user } = useUser();
+  const location = currentLocation ?? user.locations[0];
+  const records = location?.records ?? [];
   const recommendation = calculateRecommendation(records);
   const stats = calculateStats(records);
   
@@ -59,7 +61,12 @@ export default function RecomendacionPage() {
   });
 
   return (
-    <div className="p-6 lg:p-8 space-y-6">
+    <PermissionGate
+      permission="viewRecommendations"
+      title="Tu rol no puede abrir recomendaciones"
+      description="Necesitas permisos para consultar la recomendacion inteligente del negocio."
+    >
+      <div className="p-6 lg:p-8 space-y-6">
       {/* Header */}
       <div>
         <Link href="/dashboard" className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground mb-4">
@@ -299,6 +306,7 @@ export default function RecomendacionPage() {
           </Button>
         </Link>
       </div>
-    </div>
+      </div>
+    </PermissionGate>
   );
 }
