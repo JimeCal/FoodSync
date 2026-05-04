@@ -1,2 +1,2 @@
 # FoodSync
-FoodSync is a SaaS MVP prototype designed to help small food businesses reduce waste and optimize production through simple data tracking and demand prediction.
+FoodSync is a SaaS MVP prototype designed to help small food businesses reduce waste and optimize production through simple data tracking and demand prediction. Version 1.0
