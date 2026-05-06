@@ -47,7 +47,12 @@ export default function PublicDemoPage() {
   const renderContent = () => {
     switch (activeSection) {
       case "dashboard":
-        return <LevaduramadreDashboard />;
+        return (
+          <LevaduramadreDashboard
+            onRegister={() => setActiveSection("registro")}
+            onViewDetails={() => setActiveSection("recomendacion")}
+          />
+        );
       case "registro":
         return <RegistroDatosSection />;
       case "recomendacion":
@@ -61,7 +66,10 @@ export default function PublicDemoPage() {
       case "configuracion":
         return <ConfiguracionSection />;
       default:
-        return <LevaduramadreDashboard />;
+        return <LevaduramadreDashboard
+          onRegister={() => setActiveSection("registro")}
+          onViewDetails={() => setActiveSection("recomendacion")}
+        />;
     }
   };
 

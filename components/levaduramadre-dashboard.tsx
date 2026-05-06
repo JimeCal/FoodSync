@@ -1,6 +1,6 @@
 "use client";
 
-import type { ReactNode } from "react";
+import { useState } from "react";
 import Link from "next/link";
 import {
   ArrowLeft,
@@ -31,46 +31,47 @@ import { CustomChartTooltip, WasteTooltip } from "@/components/chart-tooltip";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { useToast } from "@/hooks/use-toast";
 
 const records = [
-  { date: "mar 14", producido: 520, vendido: 489, desperdicio: 31, porcentaje: 6.0 },
-  { date: "mie 15", producido: 540, vendido: 508, desperdicio: 32, porcentaje: 5.9 },
-  { date: "jue 16", producido: 515, vendido: 488, desperdicio: 27, porcentaje: 5.2 },
-  { date: "vie 17", producido: 560, vendido: 529, desperdicio: 31, porcentaje: 5.5 },
-  { date: "sab 18", producido: 600, vendido: 580, desperdicio: 20, porcentaje: 3.3 },
-  { date: "dom 19", producido: 560, vendido: 534, desperdicio: 26, porcentaje: 4.6 },
-  { date: "hoy", producido: 500, vendido: 470, desperdicio: 30, porcentaje: 6.0 },
+  { date: "mar 14", producido: 2850, vendido: 2680, desperdicio: 170, porcentaje: 6.0 },
+  { date: "mie 15", producido: 2950, vendido: 2780, desperdicio: 170, porcentaje: 5.8 },
+  { date: "jue 16", producido: 2800, vendido: 2650, desperdicio: 150, porcentaje: 5.4 },
+  { date: "vie 17", producido: 3100, vendido: 2920, desperdicio: 180, porcentaje: 5.8 },
+  { date: "sab 18", producido: 3300, vendido: 3180, desperdicio: 120, porcentaje: 3.6 },
+  { date: "dom 19", producido: 3050, vendido: 2900, desperdicio: 150, porcentaje: 4.9 },
+  { date: "hoy", producido: 2750, vendido: 2580, desperdicio: 170, porcentaje: 6.2 },
 ];
 
 const teams = [
   {
     name: "Diego",
     location: "Levaduramadre - Tienda centro",
-    team: "3 a 5 personas",
-    produced: 500,
-    wasted: 30,
+    team: "8-12 personas",
+    produced: 2750,
+    wasted: 170,
     system: "Software especializado",
-    budget: "100-300 €",
-    interest: 85,
+    budget: "500-800 €",
+    interest: 95,
   },
   {
     name: "Ana",
     location: "Levaduramadre - Obrador",
-    team: "6 personas",
-    produced: 600,
-    wasted: 20,
+    team: "15 personas",
+    produced: 3300,
+    wasted: 120,
     system: "Excel u hojas de calculo",
-    budget: "+300 €",
-    interest: 40,
+    budget: "+1000 €",
+    interest: 65,
   },
 ];
 
 const productPlan = [
-  { producto: "Pan masa madre", actual: 184, recomendado: 172 },
-  { producto: "Bolleria", actual: 126, recomendado: 118 },
-  { producto: "Focaccias", actual: 78, recomendado: 74 },
-  { producto: "Empanadas", actual: 62, recomendado: 58 },
-  { producto: "Otros", actual: 50, recomendado: 48 },
+  { producto: "Pan masa madre", actual: 950, recomendado: 820 },
+  { producto: "Bolleria premium", actual: 680, recomendado: 580 },
+  { producto: "Focaccias artesanales", actual: 420, recomendado: 380 },
+  { producto: "Empanadas tradicionales", actual: 350, recomendado: 290 },
+  { producto: "Otros productos", actual: 280, recomendado: 260 },
 ];
 
 const today = records[records.length - 1];
@@ -80,9 +81,31 @@ const totalWasted = records.reduce((total, item) => total + item.desperdicio, 0)
 
 export function LevaduramadreDashboard({
   showBackLink = false,
+  onRegister,
+  onViewDetails,
 }: {
   showBackLink?: boolean;
+  onRegister?: () => void;
+  onViewDetails?: () => void;
 }) {
+  const { toast } = useToast();
+
+  const handleViewDetails = () => {
+    onViewDetails?.();
+    toast({
+      title: "Ver detalle",
+      description: "Abriendo la sección de recomendaciones para ver detalles.",
+    });
+  };
+
+  const handleRegisterData = () => {
+    onRegister?.();
+    toast({
+      title: "Registrar datos",
+      description: "Abriendo el formulario de registro de datos. El envío está bloqueado en modo demo.",
+    });
+  };
+
   return (
     <div className="space-y-4 p-4 sm:space-y-6 sm:p-6 lg:p-8">
       <div>
@@ -109,7 +132,10 @@ export function LevaduramadreDashboard({
               Panaderia - Resumen de hoy con datos de produccion, ventas y desperdicio.
             </p>
           </div>
-          <Button className="gap-2 bg-[#3D7F35] text-sm hover:bg-[#346B2D]">
+          <Button
+            className="gap-2 bg-[#3D7F35] text-sm hover:bg-[#346B2D]"
+            onClick={handleRegisterData}
+          >
             Registrar datos de hoy
             <ArrowRight className="h-4 w-4" />
           </Button>
@@ -131,7 +157,11 @@ export function LevaduramadreDashboard({
                 para mantener stock sin elevar la merma.
               </p>
             </div>
-            <Button variant="outline" className="gap-2 border-[#3D7F35] text-[#3D7F35] hover:bg-[#3D7F35]/10">
+            <Button
+              variant="outline"
+              className="gap-2 border-[#3D7F35] text-[#3D7F35] hover:bg-[#3D7F35]/10"
+              onClick={handleViewDetails}
+            >
               Ver detalle
               <ArrowRight className="h-4 w-4" />
             </Button>

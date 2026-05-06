@@ -1,54 +1,82 @@
 "use client";
 
-import { Sparkles, TrendingUp, Target, Lightbulb } from "lucide-react";
+import { useState } from "react";
+import { Sparkles, TrendingUp, Target, Lightbulb, Lock } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { useToast } from "@/hooks/use-toast";
 
 const recommendations = [
   {
     product: "Pan masa madre",
-    current: 184,
-    recommended: 172,
-    reason: "Reducción basada en patrones de venta del último mes",
-    savings: 12,
-    impact: "12% reducción de merma estimada",
-    confidence: 94,
+    current: 950,
+    recommended: 820,
+    reason: "Reducción drástica basada en patrones de venta del último trimestre - demanda estacional baja",
+    savings: 130,
+    impact: "14% reducción de merma estimada - ahorro de €2,600 mensuales",
+    confidence: 92,
   },
   {
-    product: "Bolleria",
-    current: 126,
-    recommended: 118,
-    reason: "Ajuste según demanda de fin de semana",
-    savings: 8,
-    impact: "6% reducción de merma estimada",
-    confidence: 89,
+    product: "Bolleria premium",
+    current: 680,
+    recommended: 580,
+    reason: "Sobreproducción detectada en fines de semana - ajuste agresivo necesario",
+    savings: 100,
+    impact: "15% reducción de merma estimada - ahorro de €1,800 mensuales",
+    confidence: 88,
   },
   {
-    product: "Focaccias",
-    current: 78,
-    recommended: 74,
-    reason: "Estabilidad en demanda permite reducción segura",
-    savings: 4,
-    impact: "5% reducción de merma estimada",
-    confidence: 91,
+    product: "Focaccias artesanales",
+    current: 420,
+    recommended: 380,
+    reason: "Producto de nicho con demanda inestable - optimización conservadora",
+    savings: 40,
+    impact: "10% reducción de merma estimada - ahorro de €720 mensuales",
+    confidence: 95,
   },
   {
-    product: "Empanadas",
-    current: 62,
-    recommended: 58,
-    reason: "Producto de demanda predecible",
-    savings: 4,
-    impact: "6% reducción de merma estimada",
-    confidence: 87,
+    product: "Empanadas tradicionales",
+    current: 350,
+    recommended: 290,
+    reason: "Tendencia decreciente en ventas - reducción significativa recomendada",
+    savings: 60,
+    impact: "17% reducción de merma estimada - ahorro de €1,080 mensuales",
+    confidence: 85,
   },
 ];
 
 export default function RecomendacionSection() {
+  const [isApplying, setIsApplying] = useState(false);
+  const { toast } = useToast();
+
   const totalSavings = recommendations.reduce((sum, r) => sum + r.savings, 0);
   const avgConfidence = Math.round(
     recommendations.reduce((sum, r) => sum + r.confidence, 0) / recommendations.length
   );
+
+  const handleApplyChanges = async () => {
+    if (isApplying) return;
+
+    setIsApplying(true);
+    try {
+      // Simular aplicación de cambios
+      await new Promise(resolve => setTimeout(resolve, 2000));
+
+      toast({
+        title: "Recomendaciones aplicadas",
+        description: `Se han aplicado ${recommendations.length} recomendaciones. Ahorro estimado: ${totalSavings} unidades.`,
+      });
+    } catch (error) {
+      toast({
+        title: "Error al aplicar cambios",
+        description: "Ha ocurrido un error al aplicar las recomendaciones. Inténtalo de nuevo.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsApplying(false);
+    }
+  };
 
   return (
     <div className="space-y-6 p-4 sm:space-y-8 sm:p-6 lg:p-8">
@@ -149,7 +177,7 @@ export default function RecomendacionSection() {
                     {rec.reason}
                   </p>
                   <p className="text-xs text-muted-foreground italic">
-                    📊 {rec.impact}
+                    {rec.impact}
                   </p>
                 </div>
               </CardContent>
@@ -167,9 +195,9 @@ export default function RecomendacionSection() {
               Regístralas en tu sistema de gestión y monitorea el impacto en tu merma.
             </p>
           </div>
-          <Button className="gap-2 bg-[#3D7F35] hover:bg-[#346B2D] whitespace-nowrap">
-            <Sparkles className="h-4 w-4" />
-            Aplicar cambios
+          <Button className="gap-2 bg-[#3D7F35] hover:bg-[#346B2D] whitespace-nowrap opacity-75 cursor-not-allowed" disabled>
+            <Lock className="h-4 w-4" />
+            Modo demo
           </Button>
         </CardContent>
       </Card>

@@ -8,6 +8,7 @@ import {
   ShoppingCart,
   Trash2,
   ArrowRight,
+  Lock,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -79,6 +80,15 @@ export default function RegistroDatosSection() {
                 day: "numeric",
               })}
             </CardDescription>
+            <div className="mt-3 p-3 bg-amber-50/50 dark:bg-amber-950/10 border border-amber-200/50 dark:border-amber-800/30 rounded-lg">
+              <div className="flex items-center gap-2 text-amber-700 dark:text-amber-400">
+                <Lock className="h-4 w-4" />
+                <span className="text-sm font-medium">Modo presentación</span>
+              </div>
+              <p className="text-xs text-amber-600 dark:text-amber-500 mt-1">
+                Los formularios están bloqueados para mantener la integridad de la demostración.
+              </p>
+            </div>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-6">
@@ -88,16 +98,23 @@ export default function RegistroDatosSection() {
                   <Package className="h-4 w-4 text-[#3D7F35]" />
                   Unidades producidas
                 </Label>
-                <Input
-                  id="producido"
-                  name="producido"
-                  type="number"
-                  placeholder="0"
-                  min="0"
-                  value={formData.producido}
-                  onChange={handleInputChange}
-                  className="text-lg font-semibold"
-                />
+                <div className="relative">
+                  <Input
+                    id="producido"
+                    name="producido"
+                    type="number"
+                    placeholder="0"
+                    min="0"
+                    value={formData.producido}
+                    onChange={handleInputChange}
+                    className="text-lg font-semibold pr-10"
+                    disabled
+                  />
+                  <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-1 text-muted-foreground">
+                    <Lock className="h-3 w-3" />
+                    <span className="text-xs">Demo</span>
+                  </div>
+                </div>
                 <p className="text-xs text-muted-foreground">
                   Total de unidades fabricadas hoy
                 </p>
@@ -109,17 +126,24 @@ export default function RegistroDatosSection() {
                   <ShoppingCart className="h-4 w-4 text-[#F5841F]" />
                   Unidades vendidas
                 </Label>
-                <Input
-                  id="vendido"
-                  name="vendido"
-                  type="number"
-                  placeholder="0"
-                  min="0"
-                  max={formData.producido || undefined}
-                  value={formData.vendido}
-                  onChange={handleInputChange}
-                  className="text-lg font-semibold"
-                />
+                <div className="relative">
+                  <Input
+                    id="vendido"
+                    name="vendido"
+                    type="number"
+                    placeholder="0"
+                    min="0"
+                    max={formData.producido || undefined}
+                    value={formData.vendido}
+                    onChange={handleInputChange}
+                    className="text-lg font-semibold pr-10"
+                    disabled
+                  />
+                  <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-1 text-muted-foreground">
+                    <Lock className="h-3 w-3" />
+                    <span className="text-xs">Demo</span>
+                  </div>
+                </div>
                 <p className="text-xs text-muted-foreground">
                   Unidades que se vendieron
                 </p>
@@ -131,17 +155,24 @@ export default function RegistroDatosSection() {
                   <Trash2 className="h-4 w-4 text-destructive" />
                   Unidades desaprovechadas
                 </Label>
-                <Input
-                  id="desperdicio"
-                  name="desperdicio"
-                  type="number"
-                  placeholder="0"
-                  min="0"
-                  max={formData.producido || undefined}
-                  value={formData.desperdicio}
-                  onChange={handleInputChange}
-                  className="text-lg font-semibold"
-                />
+                <div className="relative">
+                  <Input
+                    id="desperdicio"
+                    name="desperdicio"
+                    type="number"
+                    placeholder="0"
+                    min="0"
+                    max={formData.producido || undefined}
+                    value={formData.desperdicio}
+                    onChange={handleInputChange}
+                    className="text-lg font-semibold pr-10"
+                    disabled
+                  />
+                  <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-1 text-muted-foreground">
+                    <Lock className="h-3 w-3" />
+                    <span className="text-xs">Demo</span>
+                  </div>
+                </div>
                 <p className="text-xs text-muted-foreground">
                   Unidades no vendidas y desaprovechadas
                 </p>
@@ -149,20 +180,22 @@ export default function RegistroDatosSection() {
 
               <Button
                 type="submit"
-                className="w-full gap-2 bg-[#3D7F35] hover:bg-[#346B2D]"
+                className="w-full gap-2 bg-[#3D7F35] hover:bg-[#346B2D] opacity-75 cursor-not-allowed"
                 size="lg"
+                disabled
               >
-                {submitted ? (
-                  <>
-                    <CheckCircle2 className="h-5 w-5" />
-                    Registrado exitosamente
-                  </>
-                ) : (
-                  <>
-                    Guardar registro
-                    <ArrowRight className="h-4 w-4" />
-                  </>
-                )}
+                <Lock className="h-4 w-4" />
+                Modo presentación - Solo lectura
+              </Button>
+
+              <Button
+                type="button"
+                variant="outline"
+                className="w-full gap-2 border-[#3D7F35] text-[#3D7F35] hover:bg-[#F0FDF4] opacity-75 cursor-not-allowed"
+                disabled
+              >
+                <ArrowRight className="h-4 w-4" />
+                Cargar datos desde CSV
               </Button>
             </form>
           </CardContent>

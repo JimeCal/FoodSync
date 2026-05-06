@@ -1,13 +1,61 @@
 "use client";
 
-import { Settings, Bell, Lock, Palette, HelpCircle, LogOut, Check } from "lucide-react";
+import { useEffect, useState } from "react";
+import { Settings, Bell, Lock, Palette, HelpCircle, LogOut, Check, Shield } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
+import { useToast } from "@/hooks/use-toast";
+import { cn } from "@/lib/utils";
 
 export default function ConfiguracionSection() {
+  const [theme, setTheme] = useState<"light" | "dark" | "auto">("light");
+  const { toast } = useToast();
+
+  const applyTheme = (newTheme: "light" | "dark" | "auto") => {
+    const root = document.documentElement;
+    root.dataset.theme = newTheme;
+
+    if (newTheme === "dark") {
+      root.classList.add("dark");
+      root.classList.remove("light");
+    } else if (newTheme === "light") {
+      root.classList.remove("dark");
+      root.classList.add("light");
+    } else {
+      const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+      if (prefersDark) {
+        root.classList.add("dark");
+        root.classList.remove("light");
+      } else {
+        root.classList.remove("dark");
+        root.classList.add("light");
+      }
+    }
+  };
+
+  useEffect(() => {
+    const storedTheme = window.localStorage.getItem("foodsync-theme") as "light" | "dark" | "auto" | null;
+    if (storedTheme) {
+      setTheme(storedTheme);
+      applyTheme(storedTheme);
+    } else {
+      applyTheme(theme);
+    }
+  }, []);
+
+  const handleThemeChange = (newTheme: "light" | "dark" | "auto") => {
+    setTheme(newTheme);
+    window.localStorage.setItem("foodsync-theme", newTheme);
+    applyTheme(newTheme);
+
+    toast({
+      title: "Tema actualizado",
+      description: `Tema cambiado a ${newTheme === "light" ? "claro" : newTheme === "dark" ? "oscuro" : "automático"}`,
+    });
+  };
   return (
     <div className="space-y-6 p-4 sm:space-y-8 sm:p-6 lg:p-8">
       <div>
@@ -49,9 +97,15 @@ export default function ConfiguracionSection() {
               <Badge className="bg-[#3D7F35] text-white mt-1">Plan Plus</Badge>
             </div>
           </div>
-          <Button variant="outline" className="gap-2">
-            Editar información
-          </Button>
+          <div className="p-3 bg-amber-50/50 dark:bg-amber-950/10 border border-amber-200/50 dark:border-amber-800/30 rounded-lg">
+            <div className="flex items-center gap-2 text-amber-700 dark:text-amber-400">
+              <Lock className="h-4 w-4" />
+              <span className="text-sm font-medium">Modo presentación</span>
+            </div>
+            <p className="text-xs text-amber-600 dark:text-amber-500 mt-1">
+              Los ajustes están bloqueados para mantener la integridad de la demostración.
+            </p>
+          </div>
         </CardContent>
       </Card>
 
@@ -68,36 +122,36 @@ export default function ConfiguracionSection() {
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="space-y-3">
-            <div className="flex items-center justify-between p-3 rounded-lg border border-border">
+            <div className="flex items-center justify-between p-3 rounded-lg border border-border opacity-75">
               <div>
                 <p className="font-semibold text-foreground">Recomendación diaria</p>
                 <p className="text-sm text-muted-foreground">Recibe predicciones cada mañana</p>
               </div>
-              <Switch defaultChecked />
+              <Switch defaultChecked disabled />
             </div>
 
-            <div className="flex items-center justify-between p-3 rounded-lg border border-border">
+            <div className="flex items-center justify-between p-3 rounded-lg border border-border opacity-75">
               <div>
                 <p className="font-semibold text-foreground">Alerta de desperdicio</p>
                 <p className="text-sm text-muted-foreground">Si superas el 5% de merma</p>
               </div>
-              <Switch defaultChecked />
+              <Switch defaultChecked disabled />
             </div>
 
-            <div className="flex items-center justify-between p-3 rounded-lg border border-border">
+            <div className="flex items-center justify-between p-3 rounded-lg border border-border opacity-75">
               <div>
                 <p className="font-semibold text-foreground">Reporte semanal</p>
                 <p className="text-sm text-muted-foreground">Resumen cada lunes por la mañana</p>
               </div>
-              <Switch defaultChecked />
+              <Switch defaultChecked disabled />
             </div>
 
-            <div className="flex items-center justify-between p-3 rounded-lg border border-border">
+            <div className="flex items-center justify-between p-3 rounded-lg border border-border opacity-75">
               <div>
                 <p className="font-semibold text-foreground">Noticias y actualizaciones</p>
                 <p className="text-sm text-muted-foreground">Entérate de nuevas funciones</p>
               </div>
-              <Switch />
+              <Switch disabled />
             </div>
           </div>
         </CardContent>
@@ -115,22 +169,56 @@ export default function ConfiguracionSection() {
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="grid sm:grid-cols-3 gap-3">
-            <button className="p-4 rounded-lg border-2 border-[#3D7F35] bg-white dark:bg-slate-950 flex flex-col items-center gap-2 transition-all">
-              <div className="w-8 h-8 rounded bg-white border border-muted" />
-              <span className="text-sm font-semibold">Claro</span>
-              <Check className="h-4 w-4 text-[#3D7F35]" />
-            </button>
-            <button className="p-4 rounded-lg border border-border hover:border-[#3D7F35] bg-slate-900 flex flex-col items-center gap-2 transition-all">
-              <div className="w-8 h-8 rounded bg-slate-800 border border-slate-600" />
-              <span className="text-sm font-semibold text-white">Oscuro</span>
-            </button>
-            <button className="p-4 rounded-lg border border-border hover:border-[#3D7F35] flex flex-col items-center gap-2 transition-all">
-              <div className="flex gap-1">
-                <div className="w-4 h-8 rounded-l bg-white border border-muted" />
-                <div className="w-4 h-8 rounded-r bg-slate-800 border border-slate-600" />
+          <div className="grid sm:grid-cols-3 gap-4">
+            <button
+              onClick={() => handleThemeChange("light")}
+              className={cn(
+                "group relative flex flex-col items-start space-y-3 rounded-3xl border px-5 py-6 text-left transition-all duration-200",
+                theme === "light"
+                  ? "border-[#3D7F35] bg-[#F0FDF4] shadow-sm shadow-[#3D7F35]/10"
+                  : "border-border bg-card hover:border-[#3D7F35] hover:bg-white/90 dark:bg-slate-950 dark:hover:bg-slate-900",
+              )}
+            >
+              <div className="inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-white text-[#3D7F35] shadow-sm shadow-slate-200 dark:bg-slate-900 dark:text-[#A7F3D0]">
+                <span className="text-xl font-bold">☀</span>
               </div>
-              <span className="text-sm font-semibold">Automático</span>
+              <span className="text-sm font-semibold text-foreground">Claro</span>
+              <p className="text-xs text-muted-foreground">Iluminación suave, máximo contraste.</p>
+              {theme === "light" && <Check className="absolute right-4 top-4 h-4 w-4 text-[#3D7F35]" />}
+            </button>
+
+            <button
+              onClick={() => handleThemeChange("dark")}
+              className={cn(
+                "group relative flex flex-col items-start space-y-3 rounded-3xl border px-5 py-6 text-left transition-all duration-200",
+                theme === "dark"
+                  ? "border-[#3D7F35] bg-[#071A0F] shadow-sm shadow-[#3D7F35]/20"
+                  : "border-border bg-slate-950 hover:border-[#3D7F35] hover:bg-slate-900",
+              )}
+            >
+              <div className="inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-slate-900 text-[#A7F3D0] shadow-sm shadow-slate-950">
+                <span className="text-xl font-bold">🌙</span>
+              </div>
+              <span className="text-sm font-semibold text-white">Oscuro</span>
+              <p className="text-xs text-slate-400">Ambiente elegante con luminosidad tenue.</p>
+              {theme === "dark" && <Check className="absolute right-4 top-4 h-4 w-4 text-[#3D7F35]" />}
+            </button>
+
+            <button
+              onClick={() => handleThemeChange("auto")}
+              className={cn(
+                "group relative flex flex-col items-start space-y-3 rounded-3xl border px-5 py-6 text-left transition-all duration-200",
+                theme === "auto"
+                  ? "border-[#3D7F35] bg-[#EFF6FF] shadow-sm shadow-[#3D7F35]/10 dark:bg-[#0F172A]"
+                  : "border-border bg-card hover:border-[#3D7F35] hover:bg-white/90 dark:bg-slate-950 dark:hover:bg-slate-900",
+              )}
+            >
+              <div className="inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-[#E0F2FE] to-[#0B1120] text-white shadow-sm shadow-slate-900">
+                <span className="text-xl font-bold">⟳</span>
+              </div>
+              <span className="text-sm font-semibold text-foreground">Automático</span>
+              <p className="text-xs text-muted-foreground">Se ajusta a las preferencias del sistema.</p>
+              {theme === "auto" && <Check className="absolute right-4 top-4 h-4 w-4 text-[#3D7F35]" />}
             </button>
           </div>
         </CardContent>
@@ -157,8 +245,9 @@ export default function ConfiguracionSection() {
               No activado
             </Badge>
           </div>
-          <Button variant="outline" className="gap-2 w-full sm:w-auto">
-            Activar 2FA
+          <Button variant="outline" className="gap-2 w-full sm:w-auto opacity-75 cursor-not-allowed" disabled>
+            <Lock className="h-4 w-4" />
+            Modo demo
           </Button>
 
           <div className="pt-4 border-t border-border">
@@ -188,13 +277,13 @@ export default function ConfiguracionSection() {
         </CardHeader>
         <CardContent>
           <div className="space-y-2">
-            <Button variant="outline" className="w-full justify-start gap-2">
-              📖 Centro de ayuda
+            <Button variant="outline" className="w-full justify-start gap-2 opacity-75 cursor-not-allowed" disabled>
+              📄 Centro de ayuda
             </Button>
-            <Button variant="outline" className="w-full justify-start gap-2">
+            <Button variant="outline" className="w-full justify-start gap-2 opacity-75 cursor-not-allowed" disabled>
               💬 Contactar soporte
             </Button>
-            <Button variant="outline" className="w-full justify-start gap-2">
+            <Button variant="outline" className="w-full justify-start gap-2 opacity-75 cursor-not-allowed" disabled>
               📧 Reportar un problema
             </Button>
           </div>
@@ -210,10 +299,10 @@ export default function ConfiguracionSection() {
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-3">
-          <Button variant="outline" className="w-full justify-start gap-2">
+          <Button variant="outline" className="w-full justify-start gap-2 opacity-75 cursor-not-allowed" disabled>
             📥 Descargar mis datos
           </Button>
-          <Button variant="outline" className="w-full justify-start gap-2">
+          <Button variant="outline" className="w-full justify-start gap-2 opacity-75 cursor-not-allowed" disabled>
             🗑️ Solicitar eliminación de datos
           </Button>
         </CardContent>
@@ -227,9 +316,9 @@ export default function ConfiguracionSection() {
         <CardContent className="space-y-3">
           <div className="p-3 rounded-lg border border-destructive/20 bg-destructive/5">
             <p className="text-sm font-medium text-foreground mb-2">Cerrar sesión</p>
-            <Button variant="outline" className="gap-2">
-              <LogOut className="h-4 w-4" />
-              Cerrar sesión
+            <Button variant="outline" className="gap-2 opacity-75 cursor-not-allowed" disabled>
+              <Lock className="h-4 w-4" />
+              Modo demo
             </Button>
           </div>
           <div className="p-3 rounded-lg border border-destructive/20 bg-destructive/5">
@@ -237,8 +326,9 @@ export default function ConfiguracionSection() {
             <p className="text-xs text-muted-foreground mb-3">
               Esta acción no se puede deshacer. Eliminaremos todos tus datos de forma permanente.
             </p>
-            <Button variant="destructive" className="gap-2">
-              🗑️ Eliminar cuenta permanentemente
+            <Button variant="destructive" className="gap-2 opacity-75 cursor-not-allowed" disabled>
+              <Lock className="h-4 w-4" />
+              Modo demo
             </Button>
           </div>
         </CardContent>

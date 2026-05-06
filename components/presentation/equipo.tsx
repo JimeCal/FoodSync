@@ -1,11 +1,13 @@
 "use client";
 
-import { Users, UserPlus, Mail, Shield, Trash2, Edit2 } from "lucide-react";
+import { useState } from "react";
+import { Users, UserPlus, Mail, Shield, Trash2, Edit2, Lock } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { AvatarGroup } from "@/components/ui/avatar";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { useToast } from "@/hooks/use-toast";
 
 const teamMembers = [
   {
@@ -57,6 +59,52 @@ const rolePermissions = {
 };
 
 export default function EquipoSection() {
+  const [pendingInvitations, setPendingInvitations] = useState([
+    {
+      id: "1",
+      email: "maria@levaduramadre.es",
+      role: "Responsable Obrador",
+    }
+  ]);
+  const { toast } = useToast();
+
+  const handleResendInvitation = async (invitationId: string) => {
+    try {
+      // Simular envío de invitación
+      await new Promise(resolve => setTimeout(resolve, 1000));
+
+      toast({
+        title: "Invitación reenviada",
+        description: "La invitación ha sido reenviada exitosamente.",
+      });
+    } catch (error) {
+      toast({
+        title: "Error al reenviar invitación",
+        description: "Ha ocurrido un error al reenviar la invitación. Inténtalo de nuevo.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleCancelInvitation = async (invitationId: string) => {
+    try {
+      // Simular cancelación de invitación
+      await new Promise(resolve => setTimeout(resolve, 500));
+
+      setPendingInvitations(prev => prev.filter(inv => inv.id !== invitationId));
+
+      toast({
+        title: "Invitación cancelada",
+        description: "La invitación ha sido cancelada exitosamente.",
+      });
+    } catch (error) {
+      toast({
+        title: "Error al cancelar invitación",
+        description: "Ha ocurrido un error al cancelar la invitación. Inténtalo de nuevo.",
+        variant: "destructive",
+      });
+    }
+  };
   return (
     <div className="space-y-6 p-4 sm:space-y-8 sm:p-6 lg:p-8">
       <div>
@@ -99,6 +147,21 @@ export default function EquipoSection() {
         </Card>
       </div>
 
+      {/* Mensaje de demo */}
+      <Card className="border-amber-200/50 bg-amber-50/50 dark:border-amber-900/30 dark:bg-amber-950/10">
+        <CardContent className="p-4">
+          <div className="flex items-center gap-3">
+            <Lock className="h-5 w-5 text-amber-600 dark:text-amber-400" />
+            <div>
+              <p className="font-semibold text-amber-700 dark:text-amber-400">Modo presentación</p>
+              <p className="text-sm text-amber-600 dark:text-amber-500">
+                La gestión de equipo está bloqueada para mantener la integridad de la demostración.
+              </p>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
       {/* Lista de miembros */}
       <Card>
         <CardHeader className="flex items-center justify-between">
@@ -106,9 +169,9 @@ export default function EquipoSection() {
             <CardTitle>Miembros del equipo</CardTitle>
             <CardDescription>Gestiona acceso y permisos de tu equipo</CardDescription>
           </div>
-          <Button className="gap-2 bg-[#3D7F35] hover:bg-[#346B2D]">
-            <UserPlus className="h-4 w-4" />
-            <span className="hidden sm:inline">Invitar miembro</span>
+          <Button className="gap-2 bg-[#3D7F35] hover:bg-[#346B2D] opacity-75 cursor-not-allowed" disabled>
+            <Lock className="h-4 w-4" />
+            <span className="hidden sm:inline">Modo demo</span>
           </Button>
         </CardHeader>
         <CardContent>
@@ -142,10 +205,10 @@ export default function EquipoSection() {
                   >
                     ● {member.status}
                   </Badge>
-                  <Button size="sm" variant="ghost">
+                  <Button size="sm" variant="ghost" className="opacity-50 cursor-not-allowed" disabled>
                     <Edit2 className="h-4 w-4" />
                   </Button>
-                  <Button size="sm" variant="ghost" className="text-destructive hover:text-destructive">
+                  <Button size="sm" variant="ghost" className="text-destructive hover:text-destructive opacity-50 cursor-not-allowed" disabled>
                     <Trash2 className="h-4 w-4" />
                   </Button>
                 </div>
@@ -189,20 +252,37 @@ export default function EquipoSection() {
           <CardDescription>Usuarios invitados que aún no han aceptado</CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-3 border border-amber-200/30 dark:border-amber-800/30 rounded-lg gap-3">
-            <div>
-              <p className="font-semibold text-foreground">maria@levaduramadre.es</p>
-              <p className="text-sm text-muted-foreground">Invitada como Responsable Obrador</p>
+          {pendingInvitations.length > 0 ? (
+            pendingInvitations.map((invitation) => (
+              <div key={invitation.id} className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-3 border border-amber-200/30 dark:border-amber-800/30 rounded-lg gap-3">
+                <div>
+                  <p className="font-semibold text-foreground">{invitation.email}</p>
+                  <p className="text-sm text-muted-foreground">Invitada como {invitation.role}</p>
+                </div>
+                <div className="flex gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handleResendInvitation(invitation.id)}
+                  >
+                    <Mail className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="text-destructive hover:text-destructive"
+                    onClick={() => handleCancelInvitation(invitation.id)}
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                </div>
+              </div>
+            ))
+          ) : (
+            <div className="text-center py-6">
+              <p className="text-muted-foreground">No hay invitaciones pendientes</p>
             </div>
-            <div className="flex gap-2">
-              <Button variant="outline" size="sm">
-                <Mail className="h-4 w-4" />
-              </Button>
-              <Button variant="ghost" size="sm" className="text-destructive hover:text-destructive">
-                <Trash2 className="h-4 w-4" />
-              </Button>
-            </div>
-          </div>
+          )}
         </CardContent>
       </Card>
     </div>
