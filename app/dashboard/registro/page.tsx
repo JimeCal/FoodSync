@@ -91,7 +91,7 @@ export default function RegistroPage() {
               <div className="flex flex-col gap-3">
                 <Link href="/dashboard/recomendacion">
                   <Button className="w-full bg-[#3D7F35] hover:bg-[#346B2D]">
-                    Ver recomendacion para manana
+                    Ver recomendacion para mañana
                   </Button>
                 </Link>
                 <Link href="/dashboard">

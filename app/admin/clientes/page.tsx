@@ -45,16 +45,16 @@ export default function AdminClientsPage() {
               Ver locales
               <ArrowRight className="h-4 w-4" />
             </Button>
-          </Link>
-          <Link href="/admin/accesos">
-            <Button variant="outline" className="w-full sm:w-auto">
-              Control de accesos
+              <h1 className="text-2xl font-bold text-foreground sm:text-3xl">Clientes</h1>
+              <p className="mt-1 text-sm text-muted-foreground sm:text-base">
+                Vista de control comercial y operativo para todas las cuentas activas.
+              </p>
             </Button>
           </Link>
         </div>
       </div>
 
-      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+                  Ver locales
         <Card>
           <CardContent className="p-4">
             <div className="flex items-center gap-3">

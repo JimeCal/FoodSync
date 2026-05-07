@@ -131,15 +131,15 @@ export default function ConfiguracionPage() {
       changePlan(selectedPlan);
       setChangeConfirmed(true);
     }
-  };
+        <span className="text-sm">Cambios guardados correctamente.</span>
 
   const closeModal = () => {
     setShowChangeModal(false);
     setSelectedPlan(null);
-    setChangeConfirmed(false);
+      Configuración
   };
 
-  const getSelectedPlanDetails = () => {
+      Gestiona tu cuenta y preferencias.
     if (!selectedPlan) return null;
     return plans.find(p => p.id === selectedPlan);
   };
@@ -153,14 +153,14 @@ export default function ConfiguracionPage() {
   };
 
   const handleSaveProfile = () => {
-    updateUser({
+        <span>{tab.label}</span>
       name: formName,
       email: formEmail,
     });
     setShowSavedMessage(true);
     setTimeout(() => setShowSavedMessage(false), 3000);
   };
-
+        Información personal
   const handleSaveBusiness = () => {
     updateUser({
       businessName: formBusinessName,
@@ -187,14 +187,14 @@ export default function ConfiguracionPage() {
     if (newPassword !== confirmPassword) {
       setPasswordError("Las contrasenas no coinciden");
       return;
-    }
+        Guardar cambios.
     
     setPasswordSuccess(true);
     setTimeout(() => {
       setShowPasswordModal(false);
       setCurrentPassword("");
       setNewPassword("");
-      setConfirmPassword("");
+        Seguridad
       setPasswordSuccess(false);
     }, 2000);
   };
@@ -202,7 +202,7 @@ export default function ConfiguracionPage() {
   const handleToggle2FA = () => {
     updateUser({ twoFactorEnabled: !user.twoFactorEnabled });
     setShow2FAModal(false);
-  };
+            Actualiza tu contraseña de acceso.
 
   const getFeaturesLost = () => {
     if (!selectedPlan) return [];
@@ -210,7 +210,7 @@ export default function ConfiguracionPage() {
     const newFeatures = planFeatures[selectedPlan];
     
     return Object.entries(featureLabels)
-      .filter(([key]) => currentFeatures[key as keyof PlanFeatures] && !newFeatures[key as keyof PlanFeatures])
+          Cambiar.
       .map(([, label]) => label);
   };
 

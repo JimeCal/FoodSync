@@ -48,10 +48,11 @@ export default function DashboardPage() {
   };
 
   const chartData = records.slice(-7).map((record) => ({
-    date: formatDate(record.date),
-    producido: record.produced,
-    vendido: record.sold,
-    desperdicio: record.wasted,
+          date: formatDate(record.date),
+          producido: record.produced,
+          vendido: record.sold,
+          desperdicio: record.wasted,
+          porcentajeDesperdicio: record.wastePercentage,
   }));
 
   const wasteChartData = records.slice(-7).map((record) => ({
@@ -77,7 +78,7 @@ export default function DashboardPage() {
           </p>
         </div>
         <Link href="/dashboard/registro" className="w-full sm:w-auto">
-          <Button className="gap-2 bg-[#3D7F35] hover:bg-[#346B2D] w-full sm:w-auto text-sm">
+              {location?.name || user.businessName} - Resumen de hoy
             Registrar datos de hoy
             <ArrowRight className="h-4 w-4" />
           </Button>
@@ -92,10 +93,10 @@ export default function DashboardPage() {
           </div>
           <div className="flex-1">
             <h3 className="font-semibold text-foreground text-base sm:text-lg">
-              Recomendacion para manana
+              Recomendación para mañana
             </h3>
             <p className="text-muted-foreground mt-1 text-sm">
-              Basado en tu historico de ventas, te recomendamos producir{" "}
+                Recomendación para mañana
               <span className="font-bold text-[#3D7F35] text-lg sm:text-xl">{recommendation} unidades</span>
               {" "}manana para optimizar tus recursos.
             </p>

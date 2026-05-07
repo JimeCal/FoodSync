@@ -8,7 +8,7 @@ export default function LevaduramadreDashboardPage() {
     <PermissionGate
       permission="viewDashboard"
       title="Tu rol no puede abrir el dashboard"
-      description="Esta vista esta reservada para usuarios con acceso operativo al panel del cliente."
+      description="Esta vista está reservada para usuarios con acceso operativo al panel del cliente."
     >
       <LevaduramadreDashboard showBackLink />
     </PermissionGate>

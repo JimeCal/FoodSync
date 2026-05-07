@@ -80,7 +80,7 @@ export default function AdminLocationsPage() {
         <div>
           <h1 className="text-2xl font-bold text-foreground sm:text-3xl">Locales</h1>
           <p className="mt-1 text-sm text-muted-foreground sm:text-base">
-            Seguimiento operativo por sede con foco en sincronizacion, desperdicio y responsables.
+            Seguimiento operativo por sede con foco en sincronización, desperdicio y responsables.
           </p>
         </div>
 
@@ -127,7 +127,7 @@ export default function AdminLocationsPage() {
         </Card>
         <Card>
           <CardContent className="p-4">
-            <p className="text-sm text-muted-foreground">Produccion recomendada</p>
+            <p className="text-sm text-muted-foreground">Producción recomendada</p>
             <p className="mt-2 text-2xl font-bold text-foreground">{recommendationSum} uds</p>
           </CardContent>
         </Card>
@@ -218,7 +218,7 @@ export default function AdminLocationsPage() {
                       <p className="text-xl font-bold text-foreground">{todayRecord.wastePercentage}%</p>
                     </div>
                     <div className="rounded-xl bg-muted/60 p-3">
-                      <p className="text-xs text-muted-foreground">Recomendacion</p>
+                      <p className="text-xs text-muted-foreground">Recomendación</p>
                       <p className="text-xl font-bold text-foreground">{recommendation}</p>
                     </div>
                   </div>
@@ -228,14 +228,14 @@ export default function AdminLocationsPage() {
                   <div className="rounded-xl bg-[#3D7F35]/5 p-3">
                     <p className="flex items-center gap-2 text-xs text-muted-foreground">
                       <RefreshCw className="h-3.5 w-3.5" />
-                      Sincronizacion
+                      Sincronización
                     </p>
                     <p className="mt-1 text-sm font-medium text-foreground">{location.lastSync}</p>
                   </div>
                   <div className="rounded-xl bg-[#F5841F]/5 p-3">
                     <p className="flex items-center gap-2 text-xs text-muted-foreground">
                       <MapPin className="h-3.5 w-3.5" />
-                      Infraestructura
+                        Infraestructura
                     </p>
                     <p className="mt-1 text-sm font-medium text-foreground">
                       {location.connectedDevices} dispositivos conectados
@@ -247,7 +247,7 @@ export default function AdminLocationsPage() {
                       Riesgo actual
                     </p>
                     <p className="mt-1 text-sm font-medium text-foreground">
-                      {location.openIncidents} incidencias - promedio {stats.avgWastePercentage}%
+                        {location.openIncidents} incidencias - promedio {stats.avgWastePercentage}%
                     </p>
                   </div>
                 </div>
@@ -281,9 +281,9 @@ export default function AdminLocationsPage() {
       <Dialog open={Boolean(previewLocation)} onOpenChange={(open) => !open && setPreviewLocation(undefined)}>
         <DialogContent className="sm:max-w-4xl">
           <DialogHeader>
-            <DialogTitle>Previsualizacion del local</DialogTitle>
+            <DialogTitle>Previsualización del local</DialogTitle>
             <DialogDescription>
-              Vista rapida del panel que tendria {previewLocation?.name} para administracion interna.
+              Vista rápida del panel que tendría {previewLocation?.name} para administración interna.
             </DialogDescription>
           </DialogHeader>
 
@@ -291,7 +291,7 @@ export default function AdminLocationsPage() {
             <div className="space-y-5">
               <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
                 <div className="rounded-2xl border border-border bg-muted/40 p-4">
-                  <p className="text-xs text-muted-foreground">Produccion hoy</p>
+                  <p className="text-xs text-muted-foreground">Producción hoy</p>
                   <p className="mt-2 text-2xl font-bold text-foreground">
                     {previewTodayRecord.produced}
                   </p>
@@ -309,7 +309,7 @@ export default function AdminLocationsPage() {
                   </p>
                 </div>
                 <div className="rounded-2xl border border-[#3D7F35]/20 bg-[#3D7F35]/5 p-4">
-                  <p className="text-xs text-muted-foreground">Recomendacion</p>
+                  <p className="text-xs text-muted-foreground">Recomendación</p>
                   <p className="mt-2 text-2xl font-bold text-[#3D7F35]">
                     {previewRecommendation} uds
                   </p>
@@ -339,7 +339,7 @@ export default function AdminLocationsPage() {
                     <div className="rounded-xl bg-muted/50 p-3">
                       <p className="flex items-center gap-2 text-xs text-muted-foreground">
                         <RefreshCw className="h-3.5 w-3.5" />
-                        Ultima sincronizacion
+                        Última sincronización
                       </p>
                       <p className="mt-1 text-sm font-medium text-foreground">
                         {previewLocation.lastSync}
@@ -367,17 +367,17 @@ export default function AdminLocationsPage() {
 
                   <div className="rounded-2xl border border-[#F5841F]/20 bg-[#F5841F]/5 p-4">
                     <p className="text-sm font-medium text-foreground">
-                      Resumen de lo que veria el local
+                      Resumen de lo que vería el local
                     </p>
                     <p className="mt-1 text-sm text-muted-foreground">
-                      Tendria acceso al rendimiento diario, historico del punto de venta y la recomendacion
-                      para la siguiente jornada segun su rol asignado.
+                      Tendría acceso al rendimiento diario, histórico del punto de venta y la recomendación
+                      para la siguiente jornada según su rol asignado.
                     </p>
                   </div>
                 </div>
 
                 <div className="rounded-2xl border border-border p-4">
-                  <p className="text-sm font-medium text-foreground">Ultimos 5 registros</p>
+                  <p className="text-sm font-medium text-foreground">Últimos 5 registros</p>
                   <div className="mt-4 space-y-3">
                     {previewRecentRecords.map((record) => (
                       <div key={record.id} className="rounded-xl bg-muted/50 p-3">
@@ -394,14 +394,14 @@ export default function AdminLocationsPage() {
                           <div className="rounded-lg bg-background p-2">
                             <p className="flex items-center gap-1 text-xs text-muted-foreground">
                               <Package className="h-3.5 w-3.5 text-[#3D7F35]" />
-                              Prod.
+                              Prod.</p>
                             </p>
                             <p className="mt-1 font-semibold text-foreground">{record.produced}</p>
                           </div>
                           <div className="rounded-lg bg-background p-2">
                             <p className="flex items-center gap-1 text-xs text-muted-foreground">
                               <ShoppingCart className="h-3.5 w-3.5 text-[#F5841F]" />
-                              Vend.
+                              Vend.</p>
                             </p>
                             <p className="mt-1 font-semibold text-foreground">{record.sold}</p>
                           </div>

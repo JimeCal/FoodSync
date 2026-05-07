@@ -84,19 +84,19 @@ export default function EquipoPage() {
       .filter(isStaffCredential)
       .sort((a, b) => {
         const roleDiff = roleOrder[a.type] - roleOrder[b.type];
-
+          Gestiona accesos, roles y alcance de cada persona dentro de {currentClient?.businessName}.
         if (roleDiff !== 0) {
           return roleDiff;
         }
-
-        return a.label.localeCompare(b.label);
+          title="Solo el dueño puede gestionar el equipo"
+          description="La administración de usuarios y roles internos está reservada al rol de dueño."
       });
   }, [currentClient]);
 
   const persistClients = (updater: (current: AdminClient[]) => AdminClient[]) => {
     setClients((current) => {
       const next = updater(current);
-      saveStoredAdminClients(next);
+                  Vuelve a iniciar sesión o revisa la configuración del acceso con el que entraste.
       return next;
     });
   };
@@ -104,8 +104,8 @@ export default function EquipoPage() {
   const handleCreateMember = (input: {
     label: string;
     lastAccess: string;
-    lastRotation: string;
-    locationId?: string;
+          title="Solo el dueño puede gestionar el equipo"
+          description="La administración de usuarios y roles internos está reservada al rol de dueño."
     passwordMask: string;
     role: string;
     scope: string;
@@ -115,11 +115,11 @@ export default function EquipoPage() {
     username: string;
   }) => {
     if (!currentClient) {
-      return;
+                  Volver
     }
 
     persistClients((current) =>
-      current.map((client) => {
+                  Gestiona accesos, roles y alcance de cada persona dentro de {currentClient?.businessName}.
         if (client.id !== currentClient.id) {
           return client;
         }
@@ -127,17 +127,17 @@ export default function EquipoPage() {
         const targetLocation = input.locationId
           ? client.locations.find((location) => location.id === input.locationId)
           : undefined;
-
+                Nuevo usuario
         return syncClientAccessStats({
           ...client,
           credentials: [
             ...client.credentials,
             {
               id: `${client.id}-cred-${Date.now()}`,
-              clientId: client.id,
+                  Jerarquía de permisos
               clientName: client.businessName,
               label: input.label,
-              lastAccess: input.lastAccess,
+                  Los permisos cambian automáticamente según el rol que asignes a cada usuario.
               lastRotation: input.lastRotation,
               locationId: input.locationId,
               locationName: targetLocation?.name,
